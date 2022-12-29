@@ -1,9 +1,10 @@
-import { Construct } from "@aws-cdk/core";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as ecs from "@aws-cdk/aws-ecs";
-import * as ecs_patterns from "@aws-cdk/aws-ecs-patterns";
-import * as rds from "@aws-cdk/aws-rds";
-import * as secrets from "@aws-cdk/aws-secretsmanager";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
+import {SubnetType} from "aws-cdk-lib/aws-ec2";
+import * as ecs from "aws-cdk-lib/aws-ecs";
+import {Construct} from "constructs";
+import * as ecs_patterns from "aws-cdk-lib/aws-ecs-patterns";
+import * as rds from "aws-cdk-lib/aws-rds";
+import * as secrets from 'aws-cdk-lib/aws-secretsmanager';
 
 export interface HasuraServiceProps
   extends ecs_patterns.ApplicationLoadBalancedFargateServiceProps {
@@ -47,8 +48,7 @@ export class Hasura extends Construct {
   constructor(
     scope: Construct,
     id: string,
-    public readonly props: HasuraProps
-  ) {
+    public readonly props: HasuraProps) {
     super(scope, id);
 
     // database name
@@ -58,29 +58,29 @@ export class Hasura extends Construct {
     let username = props.rds?.masterUsername || "hasura";
 
     // setup password secret
-    let passwordSecret = props.rds?.masterUserPassword;
+    let passwordSecret = props.rds?.credentials?.password;
     if (!passwordSecret) {
       this.passwordSecret = this.getHasuraSecret("InstancePassword");
       passwordSecret = this.passwordSecret.secretValue;
     }
 
     // postgres database instance
-    this.postgres = new rds.DatabaseInstance(this, "Instance", {
-      engine: rds.DatabaseInstanceEngine.POSTGRES,
-      vpc: props.vpc,
-      ...(props.rds as rds.DatabaseInstanceProps),
-      vpcPlacement: props.rds?.vpcPlacement || {
-        subnetType: ec2.SubnetType.PUBLIC,
-      },
-      databaseName: databaseName,
-      masterUsername: username,
-      masterUserPassword: passwordSecret,
-      instanceClass:
-        props.rds?.instanceClass ||
-        ec2.InstanceType.of(
-          ec2.InstanceClass.BURSTABLE2,
-          ec2.InstanceSize.LARGE
-        ),
+    this.postgres = new rds.DatabaseInstance(this,"instance",{
+       engine: rds.DatabaseInstanceEngine.POSTGRES,
+        vpc : props.vpc,
+        ...(props.rds),
+        vpcSubnets: props.rds?.vpcSubnets ?? {
+           subnetType:SubnetType.PUBLIC
+       },
+        databaseName:databaseName,
+        credentials : {
+            username: username,
+            password: passwordSecret
+       },
+        instanceType : props.rds?.instanceClass ?? ec2.InstanceType.of(
+                ec2.InstanceClass.BURSTABLE2,
+                ec2.InstanceSize.LARGE
+        )
     });
 
     // postgres connection string
