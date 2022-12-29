@@ -19,7 +19,7 @@ yarn add aws-cdk-v2-hasura
 
 ```typescript
 import * as ec2 from "aws-cdk-lib/aws-ec2";
-import { Hasura } from "aws-cdk-hasura";
+import { Hasura } from "aws-cdk-v2-hasura";
 
 const vpc = ec2.Vpc.fromLookup(this, "VPC", { isDefault: true });
 
