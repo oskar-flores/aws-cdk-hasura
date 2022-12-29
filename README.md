@@ -1,18 +1,18 @@
-# Hasura for AWS CDK
+# Hasura for AWS CDK v2
 
 Configures a [Hasura](https://hasura.io/) instance and RDS Postgres database
-for [aws-cdk](https://aws.amazon.com/cdk/) v2
+for [aws-cdk](https://aws.amazon.com/cdk/) v2, **is not compatible with CDK V1**
 
 ## Installation
 
 ```
-npm install aws-cdk-hasura
+npm install aws-cdk-v2-hasura
 ```
 
 or
 
 ```
-yarn add aws-cdk-hasura
+yarn add aws-cdk-v2-hasura
 ```
 
 ## Usage
@@ -27,3 +27,4 @@ new Hasura(this, "Hasura", {
   vpc: vpc, // VPC required
 });
 ```
+
